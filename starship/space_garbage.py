@@ -27,7 +27,7 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
         row += speed
 
 
-async def fill_orbit_with_garbage(canvas, garbage_coroutines=GARBAGE_COROUTINES):
+async def fill_orbit_with_garbage(canvas):
     garbage_frames = [
         'frames/trash_small.txt',
         'frames/trash_large.txt',
@@ -38,14 +38,12 @@ async def fill_orbit_with_garbage(canvas, garbage_coroutines=GARBAGE_COROUTINES)
     ]
 
     while True:
-
-        frame_path = choice(garbage_frames)
-
         _, max_x = canvas.getmaxyx()
 
         random_speed = randint(30, 70) / 100
         frame = read_from_file(
-            os.path.join(os.path.dirname(__file__), frame_path))
+            os.path.join(os.path.dirname(__file__), choice(garbage_frames))
+        )
         entrance_column = randint(1, max_x)
 
         garbage_coroutine = fly_garbage(
@@ -54,9 +52,8 @@ async def fill_orbit_with_garbage(canvas, garbage_coroutines=GARBAGE_COROUTINES)
             garbage_frame=frame,
             speed=random_speed
         )
+        GARBAGE_COROUTINES.append(garbage_coroutine)
 
-        garbage_coroutines.append(garbage_coroutine)
-
-        random_sleep = randint(10, 40)
-        for tic in range(random_sleep):
+        random_sleep = randint(100, 400)
+        for tic in range(1000000):
             await asyncio.sleep(0)

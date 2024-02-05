@@ -52,12 +52,9 @@ def draw(canvas):
 
     spaceship_coroutines = [fire_shot_coroutine, spaceship_coroutine]
 
-    fill_orbit_with_garbage(canvas, GARBAGE_COROUTINES)
-    print(GARBAGE_COROUTINES)
-
     while True:
 
-        fill_orbit_with_garbage(canvas, GARBAGE_COROUTINES)
+        fill_orbit_with_garbage(canvas).send(None)
 
         for coroutine in stars_coroutines.copy():
             coroutine.send(None)
@@ -66,7 +63,6 @@ def draw(canvas):
             try:
                 coroutine.send(None)
             except StopIteration:
-                fill_orbit_with_garbage(canvas, GARBAGE_COROUTINES)
                 GARBAGE_COROUTINES.remove(coroutine)
 
         for coroutine in spaceship_coroutines.copy():
