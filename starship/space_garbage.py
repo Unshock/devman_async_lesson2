@@ -4,7 +4,7 @@ from random import randint, choice
 from curses_tools import draw_frame, get_frame_size
 import asyncio
 
-from common_tools import read_from_file
+from common_tools import read_from_file, sleep
 from settings import GARBAGE_COROUTINES
 
 
@@ -44,7 +44,7 @@ async def fill_orbit_with_garbage(canvas, garbage_count=3):
 
         _, max_x = canvas.getmaxyx()
 
-        random_speed = randint(20, 60) / 100
+        random_speed = randint(30, 70) / 100
         frame = read_from_file(
             os.path.join(os.path.dirname(__file__), choice(garbage_frames))
         )
@@ -61,5 +61,4 @@ async def fill_orbit_with_garbage(canvas, garbage_count=3):
 
         GARBAGE_COROUTINES.append(garbage_coroutine)
 
-        for tic in range(10):
-            await asyncio.sleep(0)
+        await sleep(tics=15)

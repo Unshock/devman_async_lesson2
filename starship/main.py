@@ -77,7 +77,7 @@ def draw(canvas):
 
 def run_starship():
     curses.update_lines_cols()
-    # curses.wrapper(draw_border)
+    curses.wrapper(draw_border)
     curses.wrapper(draw)
     curses.curs_set(False)
 
