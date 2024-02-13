@@ -5,6 +5,7 @@ import asyncio
 
 from common_tools import read_from_file, sleep
 from curses_tools import read_controls, get_frame_size, draw_frame
+from physics import update_speed
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3,
@@ -73,27 +74,79 @@ async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
     row = max_y // 2 - rocket_height // 2
     column = max_x // 2 - rocket_width // 2
 
+    row_speed = column_speed = 0
+
     for frame in itertools.cycle((rocket_frame_1, rocket_frame_2)):
         frame_height, frame_width = get_frame_size(frame)
 
         canvas.nodelay(True)
         rows_change, columns_change, _ = read_controls(canvas)
 
-        if rows_change:
-            rows_change *= speed
+        canvas.addstr(1, 5, 'rc'+str(round(rows_change, 3)), curses.A_DIM)
+        canvas.addstr(3, 5, 'cc'+str(round(columns_change, 3)), curses.A_DIM)
+
+        canvas.addstr(5, 5, 'rs'+str(round(row_speed, 2)), curses.A_DIM)
+        canvas.addstr(7, 5, 'cs'+str(round(column_speed, 2)), curses.A_DIM)
+
+        canvas.addstr(9, 5, 'r'+str(row), curses.A_DIM)
+        canvas.addstr(11, 5, 'c'+str(column), curses.A_DIM)
+
+        if rows_change or columns_change:
+
+            row_speed, column_speed = update_speed(
+                row_speed,
+                column_speed,
+                rows_direction=rows_change,
+                columns_direction=columns_change,
+                fading=0.8,
+                #column_speed_limit=6,
+                #row_speed_limit=6
+            )
+
+        else:
+
+            row_speed, column_speed = update_speed(
+                row_speed,
+                column_speed,
+                rows_direction=0,
+                columns_direction=0,
+                fading=0.8
+            )
+
+        # if abs(row_speed) < 1:
+        #     row_speed = 0
+        #row += row_speed
+        #column += column_speed
+
+        if row_speed:
             max_frame_y = max_y - frame_height - border_width
             row = max(
                 border_width,
-                min(max_frame_y, row + rows_change)
+                min(max_frame_y, row + row_speed)
             )
 
-        elif columns_change:
-            columns_change *= speed
+        if column_speed:
             max_frame_x = max_x - frame_width - border_width
             column = max(
                 border_width,
-                min(max_frame_x, column + columns_change)
+                min(max_frame_x, column + column_speed)
             )
+
+        # if rows_change:
+        #     rows_change *= speed
+        #     max_frame_y = max_y - frame_height - border_width
+        #     row = max(
+        #         border_width,
+        #         min(max_frame_y, row + rows_change)
+        #     )
+
+        # elif columns_change:
+        #     columns_change *= speed
+        #     max_frame_x = max_x - frame_width - border_width
+        #     column = max(
+        #         border_width,
+        #         min(max_frame_x, column + columns_change)
+        #     )
 
         draw_frame(canvas, row, column, frame)
         await sleep(tics=tics)

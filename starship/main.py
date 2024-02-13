@@ -6,7 +6,7 @@ from drawing_tools import create_stars
 from curses_tools import get_max_stars_count
 from space_garbage import fill_orbit_with_garbage
 from settings import GARBAGE_COROUTINES
-TIC_TIMEOUT = 0.1
+TIC_TIMEOUT = 0.1 * 1
 
 
 def draw_border(canvas):
