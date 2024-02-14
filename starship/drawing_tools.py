@@ -1,6 +1,11 @@
+import os
 from random import choice, randint
 
 from animations import blink
+from common_tools import read_from_file
+
+
+
 
 
 def get_random_star_coords(canvas, border_width=1) -> tuple:

@@ -3,9 +3,10 @@ import curses
 import itertools
 import asyncio
 
-from common_tools import read_from_file, sleep
+from common_tools import read_from_file, sleep, get_frames_list
 from curses_tools import read_controls, get_frame_size, draw_frame
 from physics import update_speed
+from settings import FIRE_SHOTS_COROUTINES
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3,
@@ -60,15 +61,33 @@ async def blink(canvas, row, column, symbol='*', delay=0):
         await sleep(3)
 
 
+async def create_fire_shot(
+        canvas, rocket_frame, row, column, row_speed, column_speed):
+
+    _, rocket_width = get_frame_size(rocket_frame)
+
+    fire_shot_column = column + rocket_width // 2 + column_speed
+    fire_shot_row = row + row_speed
+
+    fire_shot_coroutine = fire(
+        canvas,
+        start_row=fire_shot_row,
+        start_column=fire_shot_column,
+        rows_speed=-0.9
+    )
+
+    FIRE_SHOTS_COROUTINES.append(fire_shot_coroutine)
+
+
 async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
     """Display animation of flying starship"""
 
-    rocket_frame_1 = read_from_file(
-        os.path.join(os.path.dirname(__file__), 'frames/rocket_frame_1.txt'))
-    rocket_frame_2 = read_from_file(
-        os.path.join(os.path.dirname(__file__), 'frames/rocket_frame_2.txt'))
+    rocket_frames = get_frames_list(
+        'frames/rocket_frame_1.txt',
+        'frames/rocket_frame_2.txt'
+    )
 
-    rocket_height, rocket_width = get_frame_size(rocket_frame_1)
+    rocket_height, rocket_width = get_frame_size(rocket_frames[0])
 
     max_y, max_x = canvas.getmaxyx()
     row = max_y // 2 - rocket_height // 2
@@ -76,20 +95,25 @@ async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
 
     row_speed = column_speed = 0
 
-    for frame in itertools.cycle((rocket_frame_1, rocket_frame_2)):
+    for frame in itertools.cycle(rocket_frames):
         frame_height, frame_width = get_frame_size(frame)
 
         canvas.nodelay(True)
-        rows_change, columns_change, _ = read_controls(canvas)
+        rows_change, columns_change, is_fire = read_controls(canvas)
 
-        canvas.addstr(1, 5, 'rc'+str(round(rows_change, 3)), curses.A_DIM)
-        canvas.addstr(3, 5, 'cc'+str(round(columns_change, 3)), curses.A_DIM)
+        # canvas.addstr(1, 5, 'rc'+str(round(rows_change, 3)), curses.A_DIM)
+        # canvas.addstr(3, 5, 'cc'+str(round(columns_change, 3)), curses.A_DIM)
+        # 
+        # canvas.addstr(5, 5, 'rs'+str(round(row_speed, 2)), curses.A_DIM)
+        # canvas.addstr(7, 5, 'cs'+str(round(column_speed, 2)), curses.A_DIM)
+        # 
+        # canvas.addstr(9, 5, 'r'+str(row), curses.A_DIM)
+        # canvas.addstr(11, 5, 'c'+str(column), curses.A_DIM)
 
-        canvas.addstr(5, 5, 'rs'+str(round(row_speed, 2)), curses.A_DIM)
-        canvas.addstr(7, 5, 'cs'+str(round(column_speed, 2)), curses.A_DIM)
-
-        canvas.addstr(9, 5, 'r'+str(row), curses.A_DIM)
-        canvas.addstr(11, 5, 'c'+str(column), curses.A_DIM)
+        if is_fire:
+            await create_fire_shot(
+                canvas, frame, row, column, row_speed, column_speed
+            )
 
         if rows_change or columns_change:
 
@@ -112,11 +136,6 @@ async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
                 columns_direction=0,
                 fading=0.8
             )
-
-        # if abs(row_speed) < 1:
-        #     row_speed = 0
-        #row += row_speed
-        #column += column_speed
 
         if row_speed:
             max_frame_y = max_y - frame_height - border_width

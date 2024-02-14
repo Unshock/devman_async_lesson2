@@ -4,7 +4,7 @@ from random import randint, choice
 from curses_tools import draw_frame, get_frame_size
 import asyncio
 
-from common_tools import read_from_file, sleep
+from common_tools import read_from_file, sleep, get_frames_list
 from settings import GARBAGE_COROUTINES
 
 
@@ -29,14 +29,14 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
 
 async def fill_orbit_with_garbage(canvas, garbage_count=3):
 
-    garbage_frames = [
+    garbage_frames = get_frames_list(
         'frames/trash_small.txt',
         'frames/trash_large.txt',
         'frames/trash_xl.txt',
         'frames/duck.txt',
         'frames/hubble.txt',
         'frames/lamp.txt'
-    ]
+    )
 
     while True:
 
@@ -45,9 +45,7 @@ async def fill_orbit_with_garbage(canvas, garbage_count=3):
         _, max_x = canvas.getmaxyx()
 
         random_speed = randint(30, 70) / 100
-        frame = read_from_file(
-            os.path.join(os.path.dirname(__file__), choice(garbage_frames))
-        )
+        frame = choice(garbage_frames)
 
         _, frame_width = get_frame_size(frame)
         entrance_column = randint(1, max_x - frame_width)

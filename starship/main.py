@@ -5,7 +5,7 @@ from animations import fire, animate_spaceship
 from drawing_tools import create_stars
 from curses_tools import get_max_stars_count
 from space_garbage import fill_orbit_with_garbage
-from settings import GARBAGE_COROUTINES
+from settings import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES
 TIC_TIMEOUT = 0.1 * 1
 
 
@@ -24,29 +24,18 @@ def draw(canvas):
     max_stars_count = get_max_stars_count(canvas)
     stars_count = min(stars_count, max_stars_count)
 
-    max_y, max_x = canvas.getmaxyx()
-    mid_row = max_y // 2
-    mid_column = max_x // 2
-
     stars_coroutines = create_stars(
         canvas,
         stars_count,
         border_width=border_width
     )
 
-    fire_shot_coroutine = fire(
-        canvas,
-        start_row=mid_row,
-        start_column=mid_column,
-        rows_speed=-0.9
-    )
     spaceship_coroutine = animate_spaceship(
         canvas,
         border_width=border_width,
         speed=starship_speed
     )
 
-    spaceship_coroutines = [fire_shot_coroutine, spaceship_coroutine]
     fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(
         canvas,
         garbage_count
@@ -65,11 +54,13 @@ def draw(canvas):
             except StopIteration:
                 GARBAGE_COROUTINES.remove(coroutine)
 
-        for coroutine in spaceship_coroutines.copy():
+        for coroutine in FIRE_SHOTS_COROUTINES.copy():
             try:
                 coroutine.send(None)
             except StopIteration:
-                spaceship_coroutines.remove(fire_shot_coroutine)
+                FIRE_SHOTS_COROUTINES.remove(coroutine)
+
+        spaceship_coroutine.send(None)
 
         canvas.refresh()
         time.sleep(TIC_TIMEOUT)
