@@ -1,7 +1,7 @@
 import time
 import curses
 
-from animations import fire, animate_spaceship
+from animations import fire, animate_spaceship, run_spaceship
 from drawing_tools import create_stars
 from curses_tools import get_max_stars_count
 from space_garbage import fill_orbit_with_garbage
@@ -30,11 +30,15 @@ def draw(canvas):
         border_width=border_width
     )
 
-    spaceship_coroutine = animate_spaceship(
+    spaceship_coroutine = run_spaceship(
         canvas,
-        border_width=border_width,
-        speed=starship_speed
+        border_width=border_width
     )
+    # 
+    # spaceship_coroutine = animate_spaceship(
+    #     canvas,
+    #     border_width=border_width
+    # )
 
     fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(
         canvas,
