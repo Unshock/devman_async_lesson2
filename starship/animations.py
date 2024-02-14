@@ -66,8 +66,8 @@ async def create_fire_shot(
 
     _, rocket_width = get_frame_size(rocket_frame)
 
-    fire_shot_column = column + rocket_width // 2 + column_speed
-    fire_shot_row = row + row_speed
+    fire_shot_column = column + rocket_width // 2
+    fire_shot_row = row - 1  # above the starship
 
     fire_shot_coroutine = fire(
         canvas,
@@ -110,10 +110,7 @@ async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
         # canvas.addstr(9, 5, 'r'+str(row), curses.A_DIM)
         # canvas.addstr(11, 5, 'c'+str(column), curses.A_DIM)
 
-        if is_fire:
-            await create_fire_shot(
-                canvas, frame, row, column, row_speed, column_speed
-            )
+
 
         if rows_change or columns_change:
 
@@ -166,6 +163,11 @@ async def animate_spaceship(canvas, border_width=1, tics=2, speed=1):
         #         border_width,
         #         min(max_frame_x, column + columns_change)
         #     )
+
+        if is_fire:
+            await create_fire_shot(
+                canvas, frame, row, column, row_speed, column_speed
+            )
 
         draw_frame(canvas, row, column, frame)
         await sleep(tics=tics)
