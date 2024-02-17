@@ -3,9 +3,12 @@ import curses
 
 from animations import fire, animate_spaceship, run_spaceship
 from drawing_tools import create_stars
-from curses_tools import get_max_stars_count
+from curses_tools import get_max_stars_count, Canvas
 from space_garbage import fill_orbit_with_garbage
-from settings import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES
+from settings import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES, \
+    ROCKET_COROUTINES
+from spaceship import Spaceship
+
 TIC_TIMEOUT = 0.1 * 1
 
 
@@ -16,11 +19,17 @@ def draw_border(canvas):
 
 def draw(canvas):
     """Draws blinking stars and flying starship"""
-    stars_count = 150
-    starship_speed = 1 * 2
+    stars_count = 3
     border_width = 1
     garbage_count = 3
+    spaceship = Spaceship(
+        'frames/rocket_frame_1.txt',
+        'frames/rocket_frame_2.txt'
+    )
 
+    #window = Canvas(canvas)
+
+    #determine_canvas_max_size(canvas)
     max_stars_count = get_max_stars_count(canvas)
     stars_count = min(stars_count, max_stars_count)
 
@@ -31,19 +40,16 @@ def draw(canvas):
     )
 
     spaceship_coroutine = run_spaceship(
-        canvas,
+        canvas=canvas, spaceship=spaceship,
         border_width=border_width
     )
-    # 
-    # spaceship_coroutine = animate_spaceship(
-    #     canvas,
-    #     border_width=border_width
-    # )
 
     fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(
         canvas,
         garbage_count
     )
+
+    tics = 0
 
     while True:
 
@@ -64,10 +70,19 @@ def draw(canvas):
             except StopIteration:
                 FIRE_SHOTS_COROUTINES.remove(coroutine)
 
+        for coroutine in ROCKET_COROUTINES.copy():
+            try:
+                coroutine.send(None)
+            except StopIteration:
+                ROCKET_COROUTINES.remove(coroutine)
+
         spaceship_coroutine.send(None)
+
+        #canvas.addstr(15, 5, 'WOWcc' + str(tics), curses.A_DIM)
 
         canvas.refresh()
         time.sleep(TIC_TIMEOUT)
+        tics += 1
 
 
 def run_starship():
