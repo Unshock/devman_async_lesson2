@@ -1,6 +1,7 @@
 from random import choice, randint
 
 from animations import blink
+from curses_tools import get_max_stars_count
 
 
 def get_random_star_coords(canvas, border_width=1) -> tuple:
@@ -24,11 +25,19 @@ def get_random_blink_delay(min_delay=1, max_delay=50) -> int:
     return randint(min_delay, max_delay)
 
 
-def create_stars(canvas, stars_count, border_width=1) -> list:
+def create_stars(canvas, fullness=0.1, border_width=1) -> list:
     """Creates list of stars coroutines without overlapping"""
+
+    if fullness < 0 or fullness > 1:
+        raise ValueError(
+            f'Fullness parameter {fullness} is incorrect. '
+            f'Must be in the range from 0 to 1.')
 
     stars_list = []
     stars_coords = []
+
+    max_stars_count = get_max_stars_count(canvas)
+    stars_count = int(max_stars_count * fullness)
 
     while len(stars_coords) < stars_count:
         row, col = get_random_star_coords(canvas, border_width=border_width)

@@ -94,16 +94,16 @@ def get_max_stars_count(canvas, border_width=1):
     return (max_x - border_width * 2) * (max_y - border_width * 2)
 
 
-class Canvas:
+class Window:
     def __init__(self, canvas):
         self.canvas = canvas
 
     @property
-    def rows(self):
+    def columns(self):
         _, max_x = self.canvas.getmaxyx()
         return max_x
 
     @property
-    def columns(self):
+    def rows(self):
         max_y, _ = self.canvas.getmaxyx()
         return max_y
