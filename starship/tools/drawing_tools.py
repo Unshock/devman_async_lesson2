@@ -1,7 +1,7 @@
 from random import choice, randint
 
+from tools.curses_tools import get_max_stars_count
 from animations import blink
-from curses_tools import get_max_stars_count
 
 
 def get_random_star_coords(canvas, border_width=1) -> tuple:

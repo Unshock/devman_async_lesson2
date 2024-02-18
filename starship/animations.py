@@ -1,13 +1,12 @@
-import os
 import curses
 import itertools
 import asyncio
-import random
 
-from common_tools import read_from_file, sleep, get_frames_list
-from curses_tools import read_controls, get_frame_size, draw_frame
-from settings import FIRE_SHOTS_COROUTINES, ROCKET_COROUTINES, OBSTACLES, \
+from tools.common_tools import read_from_file, sleep
+from tools.curses_tools import read_controls, get_frame_size, draw_frame
+from settings.game_state import FIRE_SHOTS_COROUTINES, OBSTACLES, \
     OBSTACLES_IN_LAST_COLLISION
+from settings import settings, game_state
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3,
@@ -37,9 +36,8 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3,
 
         for obstacle in OBSTACLES:
             if obstacle.has_collision(row, column):
-                OBSTACLES_IN_LAST_COLLISION.append(obstacle)
+                OBSTACLES_IN_LAST_COLLISION.add(obstacle)
                 return
-
 
         canvas.addstr(round(row), round(column), symbol)
         await asyncio.sleep(0)
@@ -81,23 +79,28 @@ async def create_fire_shot(canvas, spaceship):
     )
 
     FIRE_SHOTS_COROUTINES.append(fire_shot_coroutine)
+    #await sleep(1)
+
+
+async def show_game_over(window):
+    game_over = read_from_file('starship/frames/game_over.txt')
+    game_over_height, game_over_width = get_frame_size(game_over)
+
+    game_over_row = window.rows // 2 - game_over_height // 2
+    game_over_column = window.columns // 2 - game_over_width // 2
+
+    canvas = window.canvas
+
+    draw_frame(canvas, game_over_row, game_over_column, game_over)
+    await asyncio.sleep(0)
+    draw_frame(canvas, game_over_row, game_over_column, game_over, True)
 
 
 async def run_spaceship(window, spaceship, border_width=1, tics=2):
 
     canvas = window.canvas
-    #tics1 = 0
 
     for frame in itertools.cycle(spaceship.frames):
-
-        # canvas.addstr(16, 5, 'WOW2c' + str(tics1), curses.A_DIM)
-        # canvas.addstr(17, 5, 'WOW3c' + str(len(ROCKET_COROUTINES)),
-        #              curses.A_DIM)
-
-        canvas.addstr(16, 5, 'WOW2c' + str(len(OBSTACLES)), curses.A_DIM)
-        canvas.addstr(17, 5, 'WOW2c' + str(random.choice(OBSTACLES).uid), curses.A_DIM)
-        canvas.addstr(18, 5, 'WOW2c' + str(len(OBSTACLES_IN_LAST_COLLISION)),
-                      curses.A_DIM)
 
         for _ in range(tics):
             canvas.nodelay(True)
@@ -110,8 +113,17 @@ async def run_spaceship(window, spaceship, border_width=1, tics=2):
                 border_width=border_width
             )
 
-            #tics1 += 1
-            if is_fire:
+            for obstacle in OBSTACLES:
+                if obstacle.has_collision(
+                        obj_corner_row=spaceship.row,
+                        obj_corner_column=spaceship.column,
+                        obj_size_rows=spaceship.height,
+                        obj_size_columns=spaceship.width):
+                    while True:
+                        settings.GAME_OVER = True
+                        await show_game_over(window)
+
+            if is_fire and game_state.YEAR >= settings.GUN_APPEARANCE_YEAR:
                 await create_fire_shot(canvas, spaceship)
 
             draw_frame(

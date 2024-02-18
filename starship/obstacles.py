@@ -1,5 +1,6 @@
 import asyncio
-from curses_tools import draw_frame
+
+from tools.curses_tools import draw_frame
 
 
 class Obstacle:
@@ -25,7 +26,7 @@ class Obstacle:
 
     def has_collision(self, obj_corner_row, obj_corner_column, obj_size_rows=1,
                       obj_size_columns=1):
-        '''Determine if collision has occured. Return True or False.'''
+        """Determine if collision has occured. Return True or False."""
         return has_collision(
             (self.row, self.column),
             (self.rows_size, self.columns_size),
@@ -62,13 +63,14 @@ async def show_obstacles(canvas, obstacles):
 def _is_point_inside(corner_row, corner_column, size_rows, size_columns,
                      point_row, point_row_column):
     rows_flag = corner_row <= point_row < corner_row + size_rows
-    columns_flag = corner_column <= point_row_column < corner_column + size_columns
+    columns_flag = \
+        corner_column <= point_row_column < corner_column + size_columns
 
     return rows_flag and columns_flag
 
 
 def has_collision(obstacle_corner, obstacle_size, obj_corner, obj_size=(1, 1)):
-    '''Determine if collision has occured. Return True or False.'''
+    """Determine if collision has occured. Return True or False."""
 
     opposite_obstacle_corner = (
         obstacle_corner[0] + obstacle_size[0] - 1,

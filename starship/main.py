@@ -2,15 +2,13 @@ import time
 import curses
 
 from animations import run_spaceship
-from drawing_tools import create_stars
-from curses_tools import get_max_stars_count, Window
+from tools.drawing_tools import create_stars
+from tools.curses_tools import Window
 from space_garbage import fill_orbit_with_garbage
-from settings import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES, \
-    ROCKET_COROUTINES, OBSTACLES
+from settings.game_state import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES
+from settings import settings
 from spaceship import Spaceship
-from obstacles import show_obstacles
-
-TIC_TIMEOUT = 0.1 * 1
+from game_scenario import year_timer, show_year, show_phrase
 
 
 def draw_border(canvas):
@@ -21,9 +19,11 @@ def draw_border(canvas):
 def draw(canvas):
     """Draws blinking stars and flying starship"""
     border_width = 1
-    garbage_count = 3
 
     window = Window(canvas)
+
+    derived_canvas = canvas.derwin(window.rows - 4, 0)
+    derived_window = Window(derived_canvas)
 
     spaceship = Spaceship(
         window,
@@ -33,7 +33,8 @@ def draw(canvas):
 
     stars_coroutines = create_stars(
         canvas,
-        border_width=border_width
+        border_width=border_width,
+        fullness=0.05
     )
 
     spaceship_coroutine = run_spaceship(
@@ -42,18 +43,25 @@ def draw(canvas):
         border_width=border_width
     )
 
-    fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(
-        canvas,
-        garbage_count
+    fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(window)
+
+    year_timer_coroutine = year_timer(tics_for_year=settings.YEAR_TICS)
+    show_year_coroutine = show_year(derived_window)
+    phases_coroutine = show_phrase(
+        window=derived_window,
+        tics_for_year=settings.YEAR_TICS
     )
 
-    show_obstacles_coroutine = show_obstacles(canvas, OBSTACLES)
-    tics = 0
+    game_coroutines = [
+        year_timer_coroutine,
+        show_year_coroutine,
+        phases_coroutine,
+        spaceship_coroutine
+    ]
 
     while True:
 
         fill_orbit_with_garbage_coroutine.send(None)
-        show_obstacles_coroutine.send(None)
 
         for coroutine in stars_coroutines.copy():
             coroutine.send(None)
@@ -70,19 +78,15 @@ def draw(canvas):
             except StopIteration:
                 FIRE_SHOTS_COROUTINES.remove(coroutine)
 
-        for coroutine in ROCKET_COROUTINES.copy():
+        for coroutine in game_coroutines:
             try:
                 coroutine.send(None)
             except StopIteration:
-                ROCKET_COROUTINES.remove(coroutine)
-
-        spaceship_coroutine.send(None)
-
-        #canvas.addstr(15, 5, 'WOWcc' + str(tics), curses.A_DIM)
+                game_coroutines.remove(coroutine)
 
         canvas.refresh()
-        time.sleep(TIC_TIMEOUT)
-        tics += 1
+        derived_canvas.refresh()
+        time.sleep(settings.TIC_TIMEOUT)
 
 
 def run_starship():

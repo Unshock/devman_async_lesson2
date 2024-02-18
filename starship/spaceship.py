@@ -1,5 +1,5 @@
-from common_tools import get_frames_list
-from curses_tools import get_frame_size, Window
+from tools.common_tools import get_frames_list
+from tools.curses_tools import get_frame_size, Window
 from physics import update_speed
 
 
@@ -55,6 +55,13 @@ class Spaceship:
     @column_speed.setter
     def column_speed(self, column_speed):
         self._column_speed = column_speed
+
+    def get_corner_points(self):
+        left_top = self.row, self.column
+        left_bottom = self.row + self.height, self.column
+        right_top = self.row, self.column + self.width
+        right_bottom = self.row + self.height, self.column + self.width
+        return left_top, left_bottom, right_top, right_bottom
 
     def update_spaceship_coords(
             self, window, rows_change=0, columns_change=0, border_width=1):

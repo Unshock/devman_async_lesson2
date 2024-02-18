@@ -1,6 +1,8 @@
 import asyncio
 import os
 
+from settings import settings
+
 
 def read_from_file(file_name):
     """Reads text from file"""
@@ -20,7 +22,7 @@ def get_frames_list(*frames_paths):
 
     for frame_path in frames_paths:
         frame = read_from_file(
-            os.path.join(os.path.dirname(__file__), frame_path)
+            os.path.join(settings.BASE_DIR, frame_path)
         )
         frames_list.append(frame)
 

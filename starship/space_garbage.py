@@ -1,12 +1,15 @@
-import os
 from random import randint, choice
 
-from curses_tools import draw_frame, get_frame_size
 import asyncio
 
-from common_tools import read_from_file, sleep, get_frames_list
-from settings import GARBAGE_COROUTINES, OBSTACLES, OBSTACLES_IN_LAST_COLLISION
+from tools.curses_tools import draw_frame, get_frame_size
+from tools.common_tools import sleep, get_frames_list
+from settings.game_state import GARBAGE_COROUTINES, OBSTACLES, \
+    OBSTACLES_IN_LAST_COLLISION
+from settings import game_state, settings
 from obstacles import Obstacle
+from explosion import explode
+from game_scenario import get_garbage_delay_tics
 
 
 async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
@@ -15,14 +18,20 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
     Column position will stay same, as specified on start.
     """
     rows_number, columns_number = canvas.getmaxyx()
+    garbage_height, _ = get_frame_size(garbage_frame)
 
-    row = 0
+    row = -garbage_height
 
-    while row < rows_number:
+    while row < rows_number - settings.BORDER_WIDTH:
 
         if obstacle in OBSTACLES_IN_LAST_COLLISION:
             OBSTACLES_IN_LAST_COLLISION.remove(obstacle)
             OBSTACLES.remove(obstacle)
+
+            explosion_row = row + obstacle.rows_size // 2
+            explosion_column = column + obstacle.columns_size // 2
+            await explode(canvas, explosion_row, explosion_column)
+
             return
 
         draw_frame(canvas, row, column, garbage_frame)
@@ -31,10 +40,8 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
         row += speed
         obstacle.row = row
 
-    OBSTACLES.remove(obstacle)
 
-
-async def fill_orbit_with_garbage(canvas, garbage_count=3):
+async def fill_orbit_with_garbage(window):
 
     garbage_frames = get_frames_list(
         'frames/trash_small.txt',
@@ -45,38 +52,40 @@ async def fill_orbit_with_garbage(canvas, garbage_count=3):
         'frames/lamp.txt'
     )
 
+    canvas = window.canvas
     obstacle_id = 0
 
     while True:
+        garbage_delay = get_garbage_delay_tics(game_state.YEAR)
 
-        # if len(GARBAGE_COROUTINES) < garbage_count:
+        if not garbage_delay:
+            await sleep(1)
 
-        _, max_x = canvas.getmaxyx()
+        else:
+            speed = settings.GARBAGE_SPEED
+            frame = choice(garbage_frames)
 
-        random_speed = randint(30, 70) / 100
-        frame = choice(garbage_frames)
+            frame_height, frame_width = get_frame_size(frame)
+            entrance_column = randint(1, window.columns - frame_width)
 
-        frame_height, frame_width = get_frame_size(frame)
-        entrance_column = randint(1, max_x - frame_width)
+            obstacle_id += 1
+            obstacle = Obstacle(
+                row=0,
+                column=entrance_column,
+                rows_size=frame_height,
+                columns_size=frame_width,
+                uid=obstacle_id
+            )
 
-        obstacle_id += 1
-        obstacle = Obstacle(
-            row=0,
-            column=entrance_column,
-            rows_size=frame_height,
-            columns_size=frame_width,
-            uid=obstacle_id
-        )
+            garbage_coroutine = fly_garbage(
+                canvas,
+                column=entrance_column,
+                garbage_frame=frame,
+                speed=speed,
+                obstacle=obstacle
+            )
 
-        garbage_coroutine = fly_garbage(
-            canvas,
-            column=entrance_column,
-            garbage_frame=frame,
-            speed=random_speed,
-            obstacle=obstacle
-        )
+            OBSTACLES.add(obstacle)
+            GARBAGE_COROUTINES.append(garbage_coroutine)
 
-        OBSTACLES.append(obstacle)
-        GARBAGE_COROUTINES.append(garbage_coroutine)
-
-        await sleep(tics=15)
+            await sleep(garbage_delay)
