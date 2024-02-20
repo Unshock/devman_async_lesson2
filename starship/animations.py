@@ -1,12 +1,14 @@
 import curses
 import itertools
 import asyncio
+import os
 
+from explosion import explode
 from tools.common_tools import read_from_file, sleep
 from tools.curses_tools import read_controls, get_frame_size, draw_frame
-from settings.game_state import FIRE_SHOTS_COROUTINES, OBSTACLES, \
-    OBSTACLES_IN_LAST_COLLISION
 from settings import settings, game_state
+
+GAME_OVER_DIR = os.path.join(settings.BASE_DIR, settings.GAME_OVER_FRAMES_DIR)
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3,
@@ -28,15 +30,16 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3,
     symbol = '-' if columns_speed else '|'
 
     rows, columns = canvas.getmaxyx()
-    max_row, max_column = rows - 1, columns - 1
+    max_row = rows - settings.BORDER_WIDTH
+    max_column = columns - settings.BORDER_WIDTH
 
     curses.beep()
 
     while 1 < row < max_row and 0 < column < max_column:
 
-        for obstacle in OBSTACLES:
+        for obstacle in game_state.OBSTACLES:
             if obstacle.has_collision(row, column):
-                OBSTACLES_IN_LAST_COLLISION.add(obstacle)
+                game_state.OBSTACLES_IN_LAST_COLLISION.add(obstacle)
                 return
 
         canvas.addstr(round(row), round(column), symbol)
@@ -67,6 +70,7 @@ async def blink(canvas, row, column, symbol='*', delay=0):
 
 
 async def create_fire_shot(canvas, spaceship):
+    """Creates fire shot and adds it to the fire shots coroutine"""
 
     fire_shot_column = spaceship.column + spaceship.width // 2
     fire_shot_row = spaceship.row - 1  # above the starship
@@ -78,12 +82,39 @@ async def create_fire_shot(canvas, spaceship):
         rows_speed=-0.9
     )
 
-    FIRE_SHOTS_COROUTINES.append(fire_shot_coroutine)
-    #await sleep(1)
+    game_state.FIRE_SHOTS_COROUTINES.append(fire_shot_coroutine)
+
+
+async def show_fire_alarm(window):
+    """Shows the alarm the fire gun is ready to shoot"""
+
+    alarm_phrase = settings.FIRE_ALARM_PHRASE
+    canvas = window.canvas
+
+    row = window.rows // 2
+    column = window.columns // 2 - len(alarm_phrase) // 2
+
+    for _ in range(5):
+        canvas.addstr(row, column, alarm_phrase, curses.A_DIM)
+        await sleep(1)
+
+        canvas.addstr(row, column, alarm_phrase)
+        await sleep(1)
+
+        canvas.addstr(row, column, alarm_phrase, curses.A_BOLD)
+        await sleep(1)
+
+        canvas.addstr(row, column, alarm_phrase)
+        await sleep(1)
+
+    canvas.addstr(row, column, alarm_phrase, curses.A_INVIS)
 
 
 async def show_game_over(window):
-    game_over = read_from_file('starship/frames/game_over.txt')
+    """Displays the Game Over banner"""
+    game_over = read_from_file(
+        os.path.join(GAME_OVER_DIR, settings.GAME_OVER_FRAME)
+    )
     game_over_height, game_over_width = get_frame_size(game_over)
 
     game_over_row = window.rows // 2 - game_over_height // 2
@@ -97,6 +128,10 @@ async def show_game_over(window):
 
 
 async def run_spaceship(window, spaceship, border_width=1, tics=2):
+    """
+    Async func that runs the spaceship, arranges fire shots
+    and computes spaceship collisions.
+    """
 
     canvas = window.canvas
 
@@ -113,14 +148,17 @@ async def run_spaceship(window, spaceship, border_width=1, tics=2):
                 border_width=border_width
             )
 
-            for obstacle in OBSTACLES:
+            for obstacle in game_state.OBSTACLES:
                 if obstacle.has_collision(
                         obj_corner_row=spaceship.row,
                         obj_corner_column=spaceship.column,
                         obj_size_rows=spaceship.height,
                         obj_size_columns=spaceship.width):
+                    game_state.GAME_OVER = True
+                    explosion_row = spaceship.row + spaceship.height // 2
+                    explosion_column = spaceship.column + spaceship.width // 2
+                    await explode(canvas, explosion_row, explosion_column)
                     while True:
-                        settings.GAME_OVER = True
                         await show_game_over(window)
 
             if is_fire and game_state.YEAR >= settings.GUN_APPEARANCE_YEAR:

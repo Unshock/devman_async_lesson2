@@ -1,3 +1,4 @@
+import os
 from random import randint, choice
 
 import asyncio
@@ -10,6 +11,8 @@ from settings import game_state, settings
 from obstacles import Obstacle
 from explosion import explode
 from game_scenario import get_garbage_delay_tics
+
+GARBAGE_FRAMES = settings.GARBAGE_FRAMES_DIR
 
 
 async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
@@ -44,12 +47,12 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
 async def fill_orbit_with_garbage(window):
 
     garbage_frames = get_frames_list(
-        'frames/trash_small.txt',
-        'frames/trash_large.txt',
-        'frames/trash_xl.txt',
-        'frames/duck.txt',
-        'frames/hubble.txt',
-        'frames/lamp.txt'
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_DUCK),
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_LAMP),
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_HUBBLE),
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_SMALL),
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_LARGE),
+        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_XL)
     )
 
     canvas = window.canvas

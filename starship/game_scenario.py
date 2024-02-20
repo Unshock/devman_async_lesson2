@@ -1,8 +1,8 @@
 import asyncio
 
 from tools.common_tools import sleep
-from settings import game_state
 from tools.curses_tools import draw_frame
+from settings import game_state
 
 PHRASES = {
     1957: "First Sputnik",
@@ -12,7 +12,7 @@ PHRASES = {
     1981: "Flight of the Shuttle Columbia",
     1998: 'ISS start building',
     2011: 'Messenger launch to Mercury',
-    2020: "Take the plasma gun! Shoot the garbage!",
+    # 2020: "Take the plasma gun! Shoot the garbage!",
 }
 
 
@@ -34,12 +34,14 @@ def get_garbage_delay_tics(year):
 
 
 async def year_timer(tics_for_year=15):
+    """Increase global param year every tics_for_year period"""
     while True:
         await sleep(tics_for_year)
         game_state.YEAR += 1
 
 
 async def show_year(window):
+    """Shows year than increases in the corner of canvas"""
     canvas = window.canvas
     left_border_indent = 20
 
@@ -49,7 +51,6 @@ async def show_year(window):
     while True:
         if game_state.GAME_OVER:
             return
-
         year = game_state.YEAR
 
         draw_frame(canvas, row, column, f'Year: {year}')
@@ -58,6 +59,7 @@ async def show_year(window):
 
 
 async def show_phrase(window, tics_for_year=15):
+    """Shows historical phrase for the year in the corner of canvas"""
     canvas = window.canvas
     left_border_indent = 20
     year_indent = 3
@@ -68,8 +70,8 @@ async def show_phrase(window, tics_for_year=15):
     while True:
         if game_state.GAME_OVER:
             return
-
         phrase = PHRASES.get(game_state.YEAR, '')
+
         draw_frame(canvas, row, column - len(phrase), phrase)
         await sleep(tics_for_year)
         draw_frame(canvas, row, column - len(phrase), phrase, negative=True)

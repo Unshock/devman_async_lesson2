@@ -10,7 +10,7 @@ class Spaceship:
             self.frames = frames
             self._row_speed = 0
             self._column_speed = 0
-            self._set_init_starship_coords(window)
+            self._row, self._column = self._get_init_starship_coords(window)
         else:
             raise ValueError('Frames are not valid for spaceship')
 
@@ -56,21 +56,14 @@ class Spaceship:
     def column_speed(self, column_speed):
         self._column_speed = column_speed
 
-    def get_corner_points(self):
-        left_top = self.row, self.column
-        left_bottom = self.row + self.height, self.column
-        right_top = self.row, self.column + self.width
-        right_bottom = self.row + self.height, self.column + self.width
-        return left_top, left_bottom, right_top, right_bottom
-
     def update_spaceship_coords(
             self, window, rows_change=0, columns_change=0, border_width=1):
 
         if rows_change or columns_change:
 
-            self.row_speed, self.column_speed = update_speed(
-                self.row_speed,
-                self.column_speed,
+            self._row_speed, self._column_speed = update_speed(
+                self._row_speed,
+                self._column_speed,
                 rows_direction=rows_change,
                 columns_direction=columns_change,
                 fading=0.8,
@@ -78,32 +71,33 @@ class Spaceship:
 
         else:
 
-            self.row_speed, self.column_speed = update_speed(
-                self.row_speed,
-                self.column_speed,
+            self._row_speed, self._column_speed = update_speed(
+                self._row_speed,
+                self._column_speed,
                 rows_direction=0,
                 columns_direction=0,
                 fading=0.8
             )
 
-        if self.row_speed:
+        if self._row_speed:
             max_frame_y = window.rows - self.height - border_width
             self.row = max(
                 border_width,
-                min(max_frame_y, self.row + self.row_speed)
+                min(max_frame_y, self.row + self._row_speed)
             )
 
-        if self.column_speed:
+        if self._column_speed:
             max_frame_x = window.columns - self.width - border_width
             self.column = max(
                 border_width,
-                min(max_frame_x, self.column + self.column_speed)
+                min(max_frame_x, self.column + self._column_speed)
             )
 
-    def _set_init_starship_coords(self, window):
+    def _get_init_starship_coords(self, window):
         if isinstance(window, Window):
-            self.row = window.rows // 2 - self.height // 2
-            self.column = window.columns // 2 - self.width // 2
+            row = window.rows // 2 - self.height // 2
+            column = window.columns // 2 - self.width // 2
+            return row, column
         else:
             raise ValueError(f'Invalid window obj {window}')
 

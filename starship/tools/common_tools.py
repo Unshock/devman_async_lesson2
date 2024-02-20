@@ -13,11 +13,13 @@ def read_from_file(file_name):
 
 
 async def sleep(tics=1):
+    """Custom async sleep"""
     for tic in range(tics):
         await asyncio.sleep(0)
 
 
 def get_frames_list(*frames_paths):
+    """Returns frames from frames_paths"""
     frames_list = []
 
     for frame_path in frames_paths:
