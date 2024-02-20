@@ -5,8 +5,13 @@ description = ""
 authors = ["Nedashkovsky <Nedashkovsky@ymail.com>"]
 readme = "README.md"
 
+packages = [
+    { include = "starship"},
+]
+
 [tool.poetry.dependencies]
 python = "^3.10"
+asyncio = "^3.4.3"
 
 
 [build-system]
