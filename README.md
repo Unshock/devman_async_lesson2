@@ -1,6 +1,6 @@
 ### Starship study project for Devman programming school
-Async module. Lesson 1. 
-A demo of a starship flying in shining space
+Async module. Lesson 2. 
+A game of a starship flying in shining space though lots of space garbage and shoots blaster.
 
 ### Starship install
 The project exists on **Github** and for usage could be installed using ***pip*** command:
@@ -15,7 +15,7 @@ Run of the starship package is carried out by the command below:
 ### Docker run
 The package also could be run with **Docker** using command below:
     
-    ~ $ docker run -it unshock/devmanasynclesson1
+    ~ $ docker run -it unshock/devmanasynclesson2
 
 ### Built With
 
