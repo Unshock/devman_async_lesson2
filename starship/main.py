@@ -1,7 +1,7 @@
 import time
 import curses
 
-from animations import run_spaceship, show_fire_alarm
+from starship.animations import run_spaceship, show_fire_alarm
 from tools.drawing_tools import create_stars
 from tools.curses_tools import Window
 from space_garbage import fill_orbit_with_garbage
