@@ -1,8 +1,8 @@
 import asyncio
 
-from tools.common_tools import sleep
-from tools.curses_tools import draw_frame
-from settings import game_state
+from starship.tools.common_tools import sleep
+from starship.tools.curses_tools import draw_frame
+from starship.settings import game_state
 
 PHRASES = {
     1957: "First Sputnik",

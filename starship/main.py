@@ -2,13 +2,14 @@ import time
 import curses
 
 from starship.animations import run_spaceship, show_fire_alarm
-from tools.drawing_tools import create_stars
-from tools.curses_tools import Window
-from space_garbage import fill_orbit_with_garbage
-from settings.game_state import GARBAGE_COROUTINES, FIRE_SHOTS_COROUTINES
-from settings import settings, game_state
-from spaceship import Spaceship
-from game_scenario import year_timer, show_year, show_phrase
+from starship.tools.drawing_tools import create_stars
+from starship.tools.curses_tools import Window
+from starship.space_garbage import fill_orbit_with_garbage
+from starship.settings.game_state import GARBAGE_COROUTINES, \
+    FIRE_SHOTS_COROUTINES
+from starship.settings import settings, game_state
+from starship.spaceship import Spaceship
+from starship.game_scenario import year_timer, show_year, show_phrase
 
 
 def draw_border(canvas):

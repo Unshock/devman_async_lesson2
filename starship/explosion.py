@@ -1,7 +1,7 @@
 import asyncio
 import curses
 
-from tools.curses_tools import draw_frame, get_frame_size
+from starship.tools.curses_tools import draw_frame, get_frame_size
 
 EXPLOSION_FRAMES = [
     """\

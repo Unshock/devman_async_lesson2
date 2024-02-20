@@ -3,10 +3,11 @@ import itertools
 import asyncio
 import os
 
-from explosion import explode
-from tools.common_tools import read_from_file, sleep
-from tools.curses_tools import read_controls, get_frame_size, draw_frame
-from settings import settings, game_state
+from starship.explosion import explode
+from starship.tools.common_tools import read_from_file, sleep
+from starship.tools.curses_tools import read_controls, get_frame_size, \
+    draw_frame
+from starship.settings import settings, game_state
 
 GAME_OVER_DIR = os.path.join(settings.BASE_DIR, settings.GAME_OVER_FRAMES_DIR)
 

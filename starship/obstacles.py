@@ -1,6 +1,6 @@
 import asyncio
 
-from tools.curses_tools import draw_frame
+from starship.tools.curses_tools import draw_frame
 
 
 class Obstacle:

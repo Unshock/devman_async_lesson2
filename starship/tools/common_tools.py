@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from settings import settings
+from starship.settings import settings
 
 
 def read_from_file(file_name):

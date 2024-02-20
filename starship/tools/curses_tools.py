@@ -1,4 +1,4 @@
-from settings import settings
+from starship.settings import settings
 
 SPACE_KEY_CODE = 32
 LEFT_KEY_CODE = 260

@@ -1,16 +1,15 @@
-import os
 from random import randint, choice
 
 import asyncio
 
-from tools.curses_tools import draw_frame, get_frame_size
-from tools.common_tools import sleep, get_frames_list
-from settings.game_state import GARBAGE_COROUTINES, OBSTACLES, \
+from starship.tools.curses_tools import draw_frame, get_frame_size
+from starship.tools.common_tools import sleep, get_frames_list
+from starship.settings.game_state import GARBAGE_COROUTINES, OBSTACLES, \
     OBSTACLES_IN_LAST_COLLISION
-from settings import game_state, settings
-from obstacles import Obstacle
-from explosion import explode
-from game_scenario import get_garbage_delay_tics
+from starship.settings import game_state, settings
+from starship.obstacles import Obstacle
+from starship.explosion import explode
+from starship.game_scenario import get_garbage_delay_tics
 
 GARBAGE_FRAMES = settings.GARBAGE_FRAMES_DIR
 

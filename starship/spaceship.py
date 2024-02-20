@@ -1,6 +1,6 @@
-from tools.common_tools import get_frames_list
-from tools.curses_tools import get_frame_size, Window
-from physics import update_speed
+from starship.tools.common_tools import get_frames_list
+from starship.tools.curses_tools import get_frame_size, Window
+from starship.physics import update_speed
 
 
 class Spaceship:
