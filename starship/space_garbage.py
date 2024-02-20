@@ -46,14 +46,7 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
 
 async def fill_orbit_with_garbage(window):
 
-    garbage_frames = get_frames_list(
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_DUCK),
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_LAMP),
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_HUBBLE),
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_SMALL),
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_LARGE),
-        os.path.join(GARBAGE_FRAMES, settings.GARBAGE_FRAME_TRASH_XL)
-    )
+    garbage_frames = get_frames_list(*settings.GARBAGE_FRAMES)
 
     canvas = window.canvas
     obstacle_id = 0

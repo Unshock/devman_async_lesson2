@@ -11,8 +11,6 @@ from settings import settings, game_state
 from spaceship import Spaceship
 from game_scenario import year_timer, show_year, show_phrase
 
-SPACESHIP_FRAMES = settings.SPACESHIP_FRAMES_DIR
-
 
 def draw_border(canvas):
     """Draws border"""
@@ -30,8 +28,7 @@ def draw(canvas):
 
     spaceship = Spaceship(
         window,
-        os.path.join(SPACESHIP_FRAMES, settings.SPACESHIP_FRAME_1),
-        os.path.join(SPACESHIP_FRAMES, settings.SPACESHIP_FRAME_2)
+        *settings.SPACESHIP_FRAMES
     )
 
     stars_coroutines = create_stars(
