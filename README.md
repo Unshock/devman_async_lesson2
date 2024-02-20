@@ -5,7 +5,7 @@ A demo of a starship flying in shining space
 ### Starship install
 The project exists on **Github** and for usage could be installed using ***pip*** command:
 
-    ~ $ python3 -m pip install --user git+https://github.com/Unshock/devman_async_lesson1.git
+    ~ $ python3 -m pip install --user git+https://github.com/Unshock/devman_async_lesson2.git
 
 ### Starship run
 Run of the starship package is carried out by the command below: 
