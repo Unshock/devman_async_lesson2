@@ -1,5 +1,6 @@
 from random import choice, randint
 
+from starship.settings import game_state
 from starship.tools.curses_tools import get_max_stars_count
 from starship.animations import blink
 
@@ -25,15 +26,17 @@ def get_random_blink_delay(min_delay=1, max_delay=50) -> int:
     return randint(min_delay, max_delay)
 
 
-def create_stars(canvas, fullness=0.1, border_width=1) -> list:
-    """Creates list of stars coroutines without overlapping"""
+def create_stars(canvas, fullness=0.1, border_width=1):
+    """
+    Creates stars coroutines without overlapping
+     and adds them in game_state.coroutines list
+    """
 
     if fullness < 0 or fullness > 1:
         raise ValueError(
             f'Fullness parameter {fullness} is incorrect. '
             f'Must be in the range from 0 to 1.')
 
-    stars_list = []
     stars_coords = []
 
     max_stars_count = get_max_stars_count(canvas)
@@ -50,6 +53,6 @@ def create_stars(canvas, fullness=0.1, border_width=1) -> list:
         icon = get_random_star_icon()
         delay = get_random_blink_delay()
         star_coroutine = blink(canvas, row, col, symbol=icon, delay=delay)
-        stars_list.append(star_coroutine)
+        game_state.coroutines.append(star_coroutine)
 
-    return stars_list
+    #return stars_list

@@ -83,10 +83,20 @@ async def create_fire_shot(canvas, spaceship):
         rows_speed=-0.9
     )
 
-    game_state.FIRE_SHOTS_COROUTINES.append(fire_shot_coroutine)
+    game_state.coroutines.insert(0, fire_shot_coroutine)
 
 
 async def show_fire_alarm(window):
+    """Coroutine that will show fire alarm when GUN_APPEARANCE_YEAR comes"""
+    while True:
+        if game_state.YEAR >= settings.GUN_APPEARANCE_YEAR:
+            coroutine = create_fire_alarm(window)
+            game_state.coroutines.append(coroutine)
+            return
+        await asyncio.sleep(0)
+
+
+async def create_fire_alarm(window):
     """Shows the alarm the fire gun is ready to shoot"""
 
     alarm_phrase = settings.FIRE_ALARM_PHRASE
@@ -123,9 +133,10 @@ async def show_game_over(window):
 
     canvas = window.canvas
 
-    draw_frame(canvas, game_over_row, game_over_column, game_over)
-    await asyncio.sleep(0)
-    draw_frame(canvas, game_over_row, game_over_column, game_over, True)
+    while True:
+        draw_frame(canvas, game_over_row, game_over_column, game_over)
+        await asyncio.sleep(0)
+        draw_frame(canvas, game_over_row, game_over_column, game_over, True)
 
 
 async def run_spaceship(window, spaceship, border_width=1, tics=2):
@@ -150,7 +161,7 @@ async def run_spaceship(window, spaceship, border_width=1, tics=2):
             )
 
             for obstacle in game_state.OBSTACLES:
-                if obstacle.has_collision(
+                if settings.PERMA_DEATH and obstacle.has_collision(
                         obj_corner_row=spaceship.row,
                         obj_corner_column=spaceship.column,
                         obj_size_rows=spaceship.height,
@@ -159,8 +170,8 @@ async def run_spaceship(window, spaceship, border_width=1, tics=2):
                     explosion_row = spaceship.row + spaceship.height // 2
                     explosion_column = spaceship.column + spaceship.width // 2
                     await explode(canvas, explosion_row, explosion_column)
-                    while True:
-                        await show_game_over(window)
+                    game_state.coroutines.append(show_game_over(window))
+                    return
 
             if is_fire and game_state.YEAR >= settings.GUN_APPEARANCE_YEAR:
                 await create_fire_shot(canvas, spaceship)

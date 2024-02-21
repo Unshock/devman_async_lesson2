@@ -5,11 +5,10 @@ from starship.animations import run_spaceship, show_fire_alarm
 from starship.tools.drawing_tools import create_stars
 from starship.tools.curses_tools import Window
 from starship.space_garbage import fill_orbit_with_garbage
-from starship.settings.game_state import GARBAGE_COROUTINES, \
-    FIRE_SHOTS_COROUTINES
 from starship.settings import settings, game_state
 from starship.spaceship import Spaceship
-from starship.game_scenario import year_timer, show_year, show_phrase
+from starship.game_scenario import year_timer, show_year, show_phrase, \
+    run_game_scenario
 
 
 def draw_border(canvas):
@@ -26,65 +25,26 @@ def draw(canvas):
     derived_canvas = canvas.derwin(window.rows - derwin_bottom_indent, 0)
     derived_window = Window(derived_canvas)
 
-    spaceship = Spaceship(
-        window,
-        *settings.SPACESHIP_FRAMES
-    )
+    spaceship = Spaceship(window, *settings.SPACESHIP_FRAMES)
 
-    stars_coroutines = create_stars(
-        canvas,
-        border_width=settings.BORDER_WIDTH,
-        fullness=settings.STARS_FULLNESS
-    )
+    create_stars(canvas, settings.STARS_FULLNESS, settings.BORDER_WIDTH)
+    run_game_scenario(derived_window)
 
-    spaceship_coroutine = run_spaceship(
-        window=window,
-        spaceship=spaceship,
-        border_width=settings.BORDER_WIDTH
-    )
-
-    fill_orbit_with_garbage_coroutine = fill_orbit_with_garbage(window)
-
-    show_fire_alarm_coroutine = show_fire_alarm(window)
-
-    game_is_not_over_coroutines = [
-        year_timer(tics_for_year=settings.YEAR_TICS),
-        show_year(window=derived_window),
-        show_phrase(window=derived_window, tics_for_year=settings.YEAR_TICS),
-        spaceship_coroutine
+    coroutines = [
+        fill_orbit_with_garbage(window),
+        show_fire_alarm(window),
+        run_spaceship(window, spaceship, settings.BORDER_WIDTH),
     ]
+
+    game_state.coroutines += coroutines
 
     while True:
 
-        fill_orbit_with_garbage_coroutine.send(None)
-
-        for coroutine in stars_coroutines.copy():
-            coroutine.send(None)
-
-        for coroutine in GARBAGE_COROUTINES.copy():
+        for coroutine in game_state.coroutines.copy():
             try:
                 coroutine.send(None)
             except StopIteration:
-                GARBAGE_COROUTINES.remove(coroutine)
-
-        for coroutine in FIRE_SHOTS_COROUTINES.copy():
-            try:
-                coroutine.send(None)
-            except StopIteration:
-                FIRE_SHOTS_COROUTINES.remove(coroutine)
-
-        for coroutine in game_is_not_over_coroutines:
-            try:
-                coroutine.send(None)
-            except StopIteration:
-                game_is_not_over_coroutines.remove(coroutine)
-
-        if game_state.YEAR >= settings.GUN_APPEARANCE_YEAR\
-                and show_fire_alarm_coroutine:
-            try:
-                show_fire_alarm_coroutine.send(None)
-            except StopIteration:
-                show_fire_alarm_coroutine = None
+                game_state.coroutines.remove(coroutine)
 
         canvas.refresh()
         derived_canvas.refresh()

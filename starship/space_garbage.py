@@ -4,7 +4,7 @@ import asyncio
 
 from starship.tools.curses_tools import draw_frame, get_frame_size
 from starship.tools.common_tools import sleep, get_frames_list
-from starship.settings.game_state import GARBAGE_COROUTINES, OBSTACLES, \
+from starship.settings.game_state import OBSTACLES, \
     OBSTACLES_IN_LAST_COLLISION
 from starship.settings import game_state, settings
 from starship.obstacles import Obstacle
@@ -81,6 +81,7 @@ async def fill_orbit_with_garbage(window):
             )
 
             OBSTACLES.add(obstacle)
-            GARBAGE_COROUTINES.append(garbage_coroutine)
+            #GARBAGE_COROUTINES.append(garbage_coroutine)
+            game_state.coroutines.insert(0, garbage_coroutine)
 
             await sleep(garbage_delay)

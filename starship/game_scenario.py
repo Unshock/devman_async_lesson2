@@ -2,7 +2,7 @@ import asyncio
 
 from starship.tools.common_tools import sleep
 from starship.tools.curses_tools import draw_frame
-from starship.settings import game_state
+from starship.settings import game_state, settings
 
 PHRASES = {
     1957: "First Sputnik",
@@ -71,7 +71,19 @@ async def show_phrase(window, tics_for_year=15):
         if game_state.GAME_OVER:
             return
         phrase = PHRASES.get(game_state.YEAR, '')
+        frame_column = column - len(phrase)
 
-        draw_frame(canvas, row, column - len(phrase), phrase)
-        await sleep(tics_for_year)
-        draw_frame(canvas, row, column - len(phrase), phrase, negative=True)
+        for _ in range(tics_for_year):
+            draw_frame(canvas, row, frame_column, phrase)
+            await asyncio.sleep(0)
+            draw_frame(canvas, row, frame_column, phrase, negative=True)
+
+
+def run_game_scenario(window):
+    year_timer_coroutine = year_timer(settings.YEAR_TICS)
+    show_year_coroutine = show_year(window)
+    show_phrase_coroutine = show_phrase(window, settings.YEAR_TICS)
+
+    game_state.coroutines.extend(
+        (year_timer_coroutine, show_year_coroutine, show_phrase_coroutine)
+    )
