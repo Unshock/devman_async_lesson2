@@ -2,6 +2,7 @@ import time
 import curses
 
 from starship.animations import run_spaceship, show_fire_alarm
+from starship.obstacles import show_obstacles
 from starship.tools.drawing_tools import create_stars
 from starship.tools.curses_tools import Window
 from starship.space_garbage import fill_orbit_with_garbage
@@ -34,6 +35,7 @@ def draw(canvas):
         fill_orbit_with_garbage(window),
         show_fire_alarm(window),
         run_spaceship(window, spaceship, settings.BORDER_WIDTH),
+        show_obstacles(canvas, game_state.OBSTACLES)
     ]
 
     game_state.coroutines += coroutines

@@ -4,6 +4,7 @@ import asyncio
 import os
 
 from starship.explosion import explode
+from starship.settings.game_state import OBSTACLES
 from starship.tools.common_tools import read_from_file, sleep
 from starship.tools.curses_tools import read_controls, get_frame_size, \
     draw_frame
@@ -150,6 +151,7 @@ async def run_spaceship(window, spaceship, border_width=1, tics=2):
     for frame in itertools.cycle(spaceship.frames):
 
         for _ in range(tics):
+            canvas.addstr(3, 3, str(len(OBSTACLES)), curses.A_BOLD) ########
             canvas.nodelay(True)
             rows_change, columns_change, is_fire = read_controls(canvas)
 

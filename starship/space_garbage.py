@@ -14,15 +14,18 @@ from starship.game_scenario import get_garbage_delay_tics
 GARBAGE_FRAMES = settings.GARBAGE_FRAMES_DIR
 
 
-async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
+async def fly_garbage(canvas, column, garbage_frame, garbage_id=0, speed=0.5):
     """
     Animate garbage, flying from top to bottom.
     Column position will stay same, as specified on start.
     """
     rows_number, columns_number = canvas.getmaxyx()
-    garbage_height, _ = get_frame_size(garbage_frame)
+    garbage_height, garbage_width = get_frame_size(garbage_frame)
 
     row = -garbage_height
+
+    obstacle = Obstacle(row, column, garbage_height, garbage_width, garbage_id)
+    OBSTACLES.add(obstacle)
 
     while row < rows_number - settings.BORDER_WIDTH:
 
@@ -46,42 +49,27 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
 async def fill_orbit_with_garbage(window):
 
     garbage_frames = get_frames_list(*settings.GARBAGE_FRAMES)
-
     canvas = window.canvas
-    obstacle_id = 0
 
     while True:
         garbage_delay = get_garbage_delay_tics(game_state.YEAR)
 
         if not garbage_delay:
-            await sleep(1)
+            await sleep(settings.YEAR_TICS)
 
         else:
             speed = settings.GARBAGE_SPEED
             frame = choice(garbage_frames)
 
-            frame_height, frame_width = get_frame_size(frame)
+            _, frame_width = get_frame_size(frame)
             entrance_column = randint(1, window.columns - frame_width)
-
-            obstacle_id += 1
-            obstacle = Obstacle(
-                row=0,
-                column=entrance_column,
-                rows_size=frame_height,
-                columns_size=frame_width,
-                uid=obstacle_id
-            )
 
             garbage_coroutine = fly_garbage(
                 canvas,
                 column=entrance_column,
                 garbage_frame=frame,
-                speed=speed,
-                obstacle=obstacle
+                speed=speed
             )
 
-            OBSTACLES.add(obstacle)
-            #GARBAGE_COROUTINES.append(garbage_coroutine)
             game_state.coroutines.insert(0, garbage_coroutine)
-
             await sleep(garbage_delay)
