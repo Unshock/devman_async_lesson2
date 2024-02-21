@@ -1,6 +1,7 @@
 import os
 
 PERMA_DEATH = True
+SHOW_OBSTACLES = False
 
 TIC_TIMEOUT = 0.1
 YEAR_TICS = 15
@@ -8,9 +9,7 @@ GUN_APPEARANCE_YEAR = 2020
 FIRE_ALARM_PHRASE = "Use Space. Shoot 'Em Up!"
 
 BORDER_WIDTH = 1
-
 STARS_FULLNESS = 0.05
-
 GARBAGE_SPEED = 0.5
 
 BASE_DIR = 'starship'

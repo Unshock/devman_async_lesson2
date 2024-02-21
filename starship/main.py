@@ -8,8 +8,7 @@ from starship.tools.curses_tools import Window
 from starship.space_garbage import fill_orbit_with_garbage
 from starship.settings import settings, game_state
 from starship.spaceship import Spaceship
-from starship.game_scenario import year_timer, show_year, show_phrase, \
-    run_game_scenario
+from starship.game_scenario import run_game_scenario
 
 
 def draw_border(canvas):
@@ -35,10 +34,14 @@ def draw(canvas):
         fill_orbit_with_garbage(window),
         show_fire_alarm(window),
         run_spaceship(window, spaceship, settings.BORDER_WIDTH),
-        show_obstacles(canvas, game_state.OBSTACLES)
     ]
 
     game_state.coroutines += coroutines
+
+    if settings.SHOW_OBSTACLES:
+        game_state.coroutines.append(
+            show_obstacles(canvas, game_state.OBSTACLES)
+        )
 
     while True:
 

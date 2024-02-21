@@ -54,5 +54,3 @@ def create_stars(canvas, fullness=0.1, border_width=1):
         delay = get_random_blink_delay()
         star_coroutine = blink(canvas, row, col, symbol=icon, delay=delay)
         game_state.coroutines.append(star_coroutine)
-
-    #return stars_list

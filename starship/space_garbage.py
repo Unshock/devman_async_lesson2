@@ -11,8 +11,6 @@ from starship.obstacles import Obstacle
 from starship.explosion import explode
 from starship.game_scenario import get_garbage_delay_tics
 
-GARBAGE_FRAMES = settings.GARBAGE_FRAMES_DIR
-
 
 async def fly_garbage(canvas, column, garbage_frame, garbage_id=0, speed=0.5):
     """
@@ -42,11 +40,15 @@ async def fly_garbage(canvas, column, garbage_frame, garbage_id=0, speed=0.5):
         draw_frame(canvas, row, column, garbage_frame)
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, garbage_frame, negative=True)
+
         row += speed
         obstacle.row = row
 
+    OBSTACLES.remove(obstacle)
+
 
 async def fill_orbit_with_garbage(window):
+    """Coroutine that fills canvas with garbage according game scenario rate"""
 
     garbage_frames = get_frames_list(*settings.GARBAGE_FRAMES)
     canvas = window.canvas
